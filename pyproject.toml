@@ -11,4 +11,4 @@ license = {text = "MIT"}
 readme = "README.md"
 
 [project.urls]
-Homepage = "https://github.com/seu-usuario/tracking-sdk"
+Homepage = "https://github.com/loezsilva/tracking-sdk"
