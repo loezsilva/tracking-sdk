@@ -1,0 +1,14 @@
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tracking-sdk"
+version = "0.1.0"
+description = "SDK para captura automática de erros — Error Tracker"
+requires-python = ">=3.8"
+license = {text = "MIT"}
+readme = "README.md"
+
+[project.urls]
+Homepage = "https://github.com/seu-usuario/tracking-sdk"
