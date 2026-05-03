@@ -5,6 +5,7 @@ import threading
 import urllib.request
 import json
 
+
 class DjangoMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
@@ -17,46 +18,62 @@ class DjangoMiddleware:
         self._enviar_desempenho(request, response, duracao_ms)
         return response
 
+    def process_exception(self, request, exception):
+        import tracking_sdk
+
+        contexto = {
+            "url": request.path,
+            "metodo": request.method,
+            "usuario": str(request.user)
+            if hasattr(request, "user")
+            and getattr(request.user, "is_authenticated", False)
+            else "",
+        }
+        tracking_sdk.capturar_excecao(exception, contexto_extra=contexto)
+
     def _enviar_desempenho(self, request, response, duracao_ms):
         from django.conf import settings
 
-        dsn = getattr(settings, 'TRACKING_DSN', None)
+        dsn = getattr(settings, "TRACKING_DSN", None)
         if not dsn:
             return
 
         # Parseia o DSN: scheme://chave_api@host/projeto_id
         try:
             from urllib.parse import urlparse
+
             parsed = urlparse(dsn)
             chave_api = parsed.username
-            projeto_id = parsed.path.lstrip('/')
-            base_url = f'{parsed.scheme}://{parsed.hostname}'
+            projeto_id = parsed.path.lstrip("/")
+            base_url = f"{parsed.scheme}://{parsed.hostname}"
             if parsed.port:
-                base_url += f':{parsed.port}'
+                base_url += f":{parsed.port}"
         except Exception:
             return
 
         payload = {
-            'url_endpoint': request.path,
-            'metodo_http': request.method,
-            'status_code': response.status_code,
-            'duracao_ms': duracao_ms,
-            'usuario': str(request.user) if hasattr(request, 'user') and request.user.is_authenticated else '',
-            'ambiente': getattr(settings, 'ENVIRONMENT', ''),
+            "url_endpoint": request.path,
+            "metodo_http": request.method,
+            "status_code": response.status_code,
+            "duracao_ms": duracao_ms,
+            "usuario": str(request.user)
+            if hasattr(request, "user") and request.user.is_authenticated
+            else "",
+            "ambiente": getattr(settings, "ENVIRONMENT", ""),
         }
 
         def _enviar():
             try:
-                url = f'{base_url}/api/{projeto_id}/desempenho/'
-                dados = json.dumps(payload).encode('utf-8')
+                url = f"{base_url}/api/{projeto_id}/desempenho/"
+                dados = json.dumps(payload).encode("utf-8")
                 req = urllib.request.Request(
                     url,
                     data=dados,
                     headers={
-                        'Content-Type': 'application/json',
-                        'Authorization': f'Bearer {chave_api}',
+                        "Content-Type": "application/json",
+                        "Authorization": f"Bearer {chave_api}",
                     },
-                    method='POST',
+                    method="POST",
                 )
                 urllib.request.urlopen(req, timeout=3)
             except Exception:

@@ -15,14 +15,14 @@ Depois adicione o middleware no settings.py:
 from tracking_sdk.cliente import ClienteErrorTracker
 from tracking_sdk.django_middleware import DjangoMiddleware
 
-__version__ = '0.1.0'
-__all__ = ['init', 'capturar_excecao', 'DjangoMiddleware']
+__version__ = "0.1.0"
+__all__ = ["init", "capturar_excecao", "DjangoMiddleware"]
 
 # Instância global do cliente
 _cliente = None
 
 
-def init(dsn, ambiente='', debug=False):
+def init(dsn, ambiente="", debug=False):
     """Inicializa a SDK com o DSN do projeto.
 
     Args:
